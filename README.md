@@ -36,3 +36,21 @@ maintenance and allows for more easy customization.
    creates necessary groups and gives the pi user access to sudo and the
    standard console hardware permission groups.
 
+----
+
+###Explaination of changes vs. upstream main repo
+
+* stage 0 - unchanged from upstream
+* stage 1 - unchanged from upstream
+* stage 2 - `00-copies-and-fills`, `01-sys-tweaks`, `02-net-tweaks` and `10-cleanup` are unchanged
+
+NOTE: resizing the `root` parition apart of the stage 2 upstream step is overruled by a subsequent step (03-boot-files) found below.  Hence the root partition is **not** resized.
+
+Changes/complimentary for DrideOS
+Within Stage 2, the following additions have been made:
+
+* `03-boot-files`
+* `04-dride-filesystem`
+* `05-dride-net`
+* `06-dride-base`
+

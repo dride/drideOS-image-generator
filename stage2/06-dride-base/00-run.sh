@@ -1,10 +1,5 @@
 #!/bin/bash -e
 
-# on_chroot << EOF
-# bash -c "$(curl -s https://dride.io/code/install.sh)"
-# EOF
-
-
 install -m 755 files/etc_initd_dride-ws ${ROOTFS_DIR}/etc/init.d/dride-ws
 install -m 755 files/etc_initd_dride-core ${ROOTFS_DIR}/etc/init.d/dride-core
 install -m 644 files/lib_udev_hwclock-set ${ROOTFS_DIR}/lib/udev/hwclock-set
@@ -53,7 +48,7 @@ echo "========== Update Aptitude ==========="
 # sudo apt-get update -y
 # sudo apt-get upgrade
 
-if [ ${OS_TYPE} == "drideOS" ]; then
+if [ ${OS_TYPE} == "dride-plus" ]; then
 	echo "========== Installing build-essential ============"
 	sudo apt-get install build-essential -y
 
@@ -82,7 +77,7 @@ echo "========== Installing pip ============"
 sudo apt-get install python-pip -y
 
 
-if [ ${OS_TYPE} == "drideOS" ]; then
+if [ ${OS_TYPE} == "dride-plus" ]; then
 	echo "========== Installing Numpy ============"
 	sudo pip install numpy
 fi
@@ -100,7 +95,7 @@ echo "gpu_mem=128" >> /boot/config.txt
 echo "dtparam=spi=on" >> /boot/config.txt
 
 
-if [ ${OS_TYPE} == "drideOS" ]; then
+if [ ${OS_TYPE} == "dride-plus" ]; then
 	echo "========== Install mpg123  ============"
 	sudo apt-get install mpg123 -y
 fi
@@ -113,9 +108,8 @@ sudo pip install pyserial
 #startup script's
 # sudo wget https://dride.io/code/startup/dride-ws
 
-# if [ ${OS_TYPE} == "drideOS" ]; then
+# if [ ${OS_TYPE} == "dride-plus" ]; then
 # 	sudo wget https://dride.io/code/startup/dride-core
-# 	sudo wget https://dride.io/code/startup/drideOS-resize
 # else
 # 	sudo wget https://dride.io/code/startup/dride-core
 # fi;
@@ -128,7 +122,7 @@ sudo update-rc.d dride-ws defaults
 # sudo rm dride-ws
 
 # dride-core on startup
-# if [ ${OS_TYPE} == "drideOS" ]; then
+# if [ ${OS_TYPE} == "dride-plus" ]; then
 # 	sudo cp dride-core /etc/init.d/dride-core
 # else
 # 	sudo cp dride-core /etc/init.d/dride-core
@@ -138,16 +132,8 @@ sudo update-rc.d dride-ws defaults
 sudo update-rc.d dride-core defaults
 # sudo rm dride-core
 
-# drideOS-resize on startup
-if [ ${OS_TYPE} == "drideOS" ]; then
-# 	sudo cp drideOS-resize /etc/init.d/drideOS-resize
-# 	sudo chmod +x /etc/init.d/drideOS-resize
-  sudo update-rc.d drideOS-resize defaults
-# 	sudo rm drideOS-resize
-fi;
 
-
-if [ ${OS_TYPE} == "drideOS" ]; then
+if [ ${OS_TYPE} == "dride-plus" ]; then
 	## GPS  https://www.raspberrypi.org/forums/viewtopic.php?p=947968#p947968
 	echo "========== Install GPS  ============"
 	sudo apt-get install gpsd gpsd-clients cmake subversion build-essential espeak freeglut3-dev imagemagick libdbus-1-dev libdbus-glib-1-dev libdevil-dev libfontconfig1-dev libfreetype6-dev libfribidi-dev libgarmin-dev libglc-dev libgps-dev libgtk2.0-dev libimlib2-dev libpq-dev libqt4-dev libqtwebkit-dev librsvg2-bin libsdl-image1.2-dev libspeechd-dev libxml2-dev ttf-liberation -y
@@ -176,7 +162,7 @@ fi
 
 
 
-if [ ${OS_TYPE} == "drideOS" ]; then
+if [ ${OS_TYPE} == "dride-plus" ]; then
 	echo "========== Downloading and installing OpenCV ============"
 	cd /
 	# git clone https://github.com/Itseez/opencv.git --depth 1
