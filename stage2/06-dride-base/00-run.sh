@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+# Please ensure you specify "OS_TYPE"="dride-plus" as an environment variable
+# IF you wish to enable advanced feature for Dride/Rpi3
+# Do not include if you are building for RPiZW
+
+
 install -m 755 files/etc_initd_dride-ws ${ROOTFS_DIR}/etc/init.d/dride-ws
 install -m 755 files/etc_initd_dride-core ${ROOTFS_DIR}/etc/init.d/dride-core
 install -m 644 files/lib_udev_hwclock-set ${ROOTFS_DIR}/lib/udev/hwclock-set
@@ -39,7 +44,9 @@ echo "   ========================="
 echo ""
 echo ""
 
-
+echo "========== Create DRIDE path ==========="
+# create the video/content destination
+sudo mkdir -p /dride/clip /dride/thumb /dride/tmp_clip
 
 cd /home
 
@@ -108,6 +115,7 @@ sudo pip install pyserial
 #startup script's
 # sudo wget https://dride.io/code/startup/dride-ws
 
+
 # if [ ${OS_TYPE} == "dride-plus" ]; then
 # 	sudo wget https://dride.io/code/startup/dride-core
 # else
@@ -121,12 +129,14 @@ sudo pip install pyserial
 sudo update-rc.d dride-ws defaults
 # sudo rm dride-ws
 
+
 # dride-core on startup
 # if [ ${OS_TYPE} == "dride-plus" ]; then
 # 	sudo cp dride-core /etc/init.d/dride-core
 # else
 # 	sudo cp dride-core /etc/init.d/dride-core
 # fi;
+
 
 # sudo chmod +x /etc/init.d/dride-core
 sudo update-rc.d dride-core defaults
@@ -138,14 +148,11 @@ if [ ${OS_TYPE} == "dride-plus" ]; then
 	echo "========== Install GPS  ============"
 	sudo apt-get install gpsd gpsd-clients cmake subversion build-essential espeak freeglut3-dev imagemagick libdbus-1-dev libdbus-glib-1-dev libdevil-dev libfontconfig1-dev libfreetype6-dev libfribidi-dev libgarmin-dev libglc-dev libgps-dev libgtk2.0-dev libimlib2-dev libpq-dev libqt4-dev libqtwebkit-dev librsvg2-bin libsdl-image1.2-dev libspeechd-dev libxml2-dev ttf-liberation -y
 
-
 	echo "" >> /boot/config.txt
 	echo "enable_uart=1" >> /boot/config.txt
 
 	# this will be done after initial boot
 	# echo "dwc_otg.lpm_enable=0  console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4  elevator=deadline fsck.repair=yes spidev.bufsiz=32768 rootwait" > /boot/cmdline.txt
-
-
 
 	# 3)Run
 	sudo systemctl stop serial-getty@ttyS0.service
@@ -159,7 +166,6 @@ if [ ${OS_TYPE} == "dride-plus" ]; then
 	#sudo killall gpsd
 	#sudo gpsd /dev/ttyS0 -F /var/run/gpsd.sock
 fi
-
 
 
 if [ ${OS_TYPE} == "dride-plus" ]; then
@@ -225,7 +231,8 @@ sudo update-rc.d -f fake-hwclock remove
 echo "========== Setup Accelerometer  ============"
 # http://www.stuffaboutcode.com/2014/06/raspberry-pi-adxl345-accelerometer.html
 # enable i2c 0
-echo "\n# Accelerometer\ndtparam=i2c_vc=on" >> /boot/config.txt
+echo "# Accelerometer" >> /boot/config.txt
+echo "dtparam=i2c_vc=on" >> /boot/config.txt
 
 
 echo "========== Install Dride-core [Cardigan]  ============"
@@ -236,22 +243,34 @@ sudo wget -c -O "cardigan.zip" "https://s3.amazonaws.com/dride/releases/cardigan
 sudo unzip "cardigan.zip"
 sudo rm -R cardigan.zip
 
+
 # make the video dir writable
 sudo chmod 777 -R /home/Cardigan/modules/video/
 sudo chmod 777 -R /home/Cardigan/modules/settings/
 # make gps position writable
 sudo chmod +x /home/Cardigan/daemons/gps/position
 
+
 # make the firmware dir writable
 sudo chmod 777 -R /home/Cardigan/firmware/
+
 
 # run npm install on video module
 cd /home/Cardigan/modules/video
 sudo npm i --production
+# set proper soft links to use /dride path
+sudo rm -rf tmp_clip/
+sudo ln -s /dride/tmp_clip/ tmp_clip
+sudo rm -rf thumb/
+sudo ln -s /dride/thumb/ thumb
+sudo rm -rf clip/
+sudo ln -s /dride/clip/ clip
+
 
 # run npm install on dride-ws
 cd /home/Cardigan/dride-ws
 sudo npm i --production
+
 
 # setup clear cron job
 crontab -l > cleanerJob
@@ -259,6 +278,7 @@ echo "* * * * * node /home/Cardigan/modules/video/helpers/cleaner.js" >> cleaner
 # install new cron file
 crontab cleanerJob
 rm cleanerJob
+
 
 echo "========== Install Indicators  ============"
 echo "# Needed for SPI LED" >> /boot/config.txt
